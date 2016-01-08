@@ -5,6 +5,6 @@ public class Main {
     public static void main(String[] args) {
         UDPClient client = new UDPClient(args[0], Integer.parseInt(args[1]));
 
-        client.getSecretCode(Integer.parseInt(args[2]));
+        System.out.println(client.getSecretCode(Integer.parseInt(args[2])));
     }
 }

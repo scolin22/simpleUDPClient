@@ -5,15 +5,11 @@ import com._31645112.cpen431.utils.StringUtils;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.UnsupportedEncodingException;
 import java.net.*;
 import java.util.Random;
 
 import static java.lang.Math.pow;
 
-/**
- * Created by colin on 2016-01-08.
- */
 public class ApplicationLayer {
     InetAddress remoteIP;
     int remotePort;
@@ -29,7 +25,7 @@ public class ApplicationLayer {
     final static int TIMESTAMP_LENGTH = 8;
     final static int TIMESTAMP_OFFSET = PAD_OFFSET + PAD_LENGTH;
 
-    final static String LOCAL_IP = "1.23.45.6";
+    final static String LOCAL_IP = "69.69.69.69";
 
     final static int MAX_PAYLOAD_SIZE = 256;
     final static int CLIENT_PAYLOAD_SIZE = 4;
@@ -45,9 +41,9 @@ public class ApplicationLayer {
             outBuf = new byte[MAX_PAYLOAD_SIZE];
             inBuf = new byte[MAX_PAYLOAD_SIZE];
             socket = new DatagramSocket();
-        } catch (SocketException e) {
-            e.printStackTrace();
         } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (SocketException e) {
             e.printStackTrace();
         }
     }
@@ -103,16 +99,6 @@ public class ApplicationLayer {
         System.arraycopy(inBuf, SECRET_CODE_OFFSET, secretCode, 0, secretCodeLength);
 
         return StringUtils.byteArrayToHexString(secretCode);
-//        try {
-//            return new String(secretCode, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-    }
-
-    private static String translateMessage(byte[] responsePayload) {
-        return "Hello World";
     }
 
     private byte[] buildUniqueID() {
@@ -154,7 +140,6 @@ public class ApplicationLayer {
     // http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
     public static int randInt(int min, int max) {
         Random rand = new Random();
-        int randomNum = rand.nextInt((max - min) + 1) + min;
-        return randomNum;
+        return rand.nextInt((max - min) + 1) + min;
     }
 }

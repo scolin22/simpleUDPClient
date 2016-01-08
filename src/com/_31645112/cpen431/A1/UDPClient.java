@@ -1,10 +1,5 @@
 package com._31645112.cpen431.A1;
 
-import java.net.InetAddress;
-
-/**
- * Created by colin on 2016-01-08.
- */
 public class UDPClient {
     ApplicationLayer al;
 
