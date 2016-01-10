@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_simpleudpclient" default="compile.module.simpleudpclient">
+  <dirname property="module.simpleudpclient.basedir" file="${ant.file.module_simpleudpclient}"/>
+  
+  <property name="module.jdk.home.simpleudpclient" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.simpleudpclient" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.simpleudpclient" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.simpleudpclient" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="simpleudpclient.output.dir" value="${module.simpleudpclient.basedir}/out/production/simpleUDPClient"/>
+  <property name="simpleudpclient.testoutput.dir" value="${module.simpleudpclient.basedir}/out/test/simpleUDPClient"/>
+  
+  <path id="simpleudpclient.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="simpleudpclient.module.production.classpath">
+    <path refid="${module.jdk.classpath.simpleudpclient}"/>
+    <pathelement location="${idea.home}/lib/junit.jar"/>
+    <path refid="library.groovy-2.4.5.classpath"/>
+  </path>
+  
+  <path id="simpleudpclient.runtime.production.module.classpath">
+    <pathelement location="${simpleudpclient.output.dir}"/>
+    <pathelement location="${idea.home}/lib/junit.jar"/>
+    <path refid="library.groovy-2.4.5.classpath"/>
+  </path>
+  
+  <path id="simpleudpclient.module.classpath">
+    <path refid="${module.jdk.classpath.simpleudpclient}"/>
+    <pathelement location="${simpleudpclient.output.dir}"/>
+    <pathelement location="${idea.home}/lib/junit.jar"/>
+    <path refid="library.groovy-2.4.5.classpath"/>
+  </path>
+  
+  <path id="simpleudpclient.runtime.module.classpath">
+    <pathelement location="${simpleudpclient.testoutput.dir}"/>
+    <pathelement location="${simpleudpclient.output.dir}"/>
+    <pathelement location="${idea.home}/lib/junit.jar"/>
+    <path refid="library.groovy-2.4.5.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.simpleudpclient">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.simpleudpclient">
+    <patternset refid="excluded.from.module.simpleudpclient"/>
+  </patternset>
+  
+  <path id="simpleudpclient.module.sourcepath">
+    <dirset dir="${module.simpleudpclient.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.simpleudpclient" depends="compile.module.simpleudpclient.production,compile.module.simpleudpclient.tests" description="Compile module simpleUDPClient"/>
+  
+  <target name="compile.module.simpleudpclient.production" depends="register.custom.compilers" description="Compile module simpleUDPClient; production classes">
+    <mkdir dir="${simpleudpclient.output.dir}"/>
+    <groovyc destdir="${simpleudpclient.output.dir}" fork="yes">
+      <src refid="simpleudpclient.module.sourcepath"/>
+      <classpath refid="simpleudpclient.module.production.classpath"/>
+      <patternset refid="excluded.from.compilation.simpleudpclient"/>
+      <javac debug="${compiler.debug}">
+        <compilerarg line="${compiler.args.simpleudpclient}"/>
+      </javac>
+    </groovyc>
+    <instrumentIdeaExtensions destdir="${simpleudpclient.output.dir}">
+      <compilerarg line="${compiler.args.simpleudpclient}"/>
+      <bootclasspath refid="simpleudpclient.module.bootclasspath"/>
+      <classpath refid="simpleudpclient.module.production.classpath"/>
+      <src refid="simpleudpclient.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.simpleudpclient"/>
+    </instrumentIdeaExtensions>
+    
+    <copy todir="${simpleudpclient.output.dir}">
+      <fileset dir="${module.simpleudpclient.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.simpleudpclient.tests" depends="register.custom.compilers,compile.module.simpleudpclient.production" description="compile module simpleUDPClient; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.simpleudpclient" description="cleanup module">
+    <delete dir="${simpleudpclient.output.dir}"/>
+    <delete dir="${simpleudpclient.testoutput.dir}"/>
+  </target>
+</project>
