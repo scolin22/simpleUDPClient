@@ -1,6 +1,5 @@
 package com._31645112.cpen431.utils;
 
-
 /**
  * Various static routines to help with strings
  */
@@ -12,7 +11,7 @@ public class StringUtils {
         int val;
 
         for (int i=0; i<bytes.length; i++) {
-            val = ByteOrder.ubyte2int(bytes[i]);
+            val = ByteOrderMatei.ubyte2int(bytes[i]);
             str = Integer.toHexString(val);
             while ( str.length() < 2 )
                 str = "0" + str;

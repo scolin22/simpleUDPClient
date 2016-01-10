@@ -1,9 +1,9 @@
 package com._31645112.cpen431.A1;
 
-public class UDPClient {
+public class SecretCodeClient {
     ApplicationLayer al;
 
-    public UDPClient(String remoteIP, int remotePort) {
+    public SecretCodeClient(String remoteIP, int remotePort) {
         this.al = new ApplicationLayer(remoteIP, remotePort);
     }
 

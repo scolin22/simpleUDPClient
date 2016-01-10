@@ -6,7 +6,7 @@ import java.io.*;
 /**
  * Various static routines for solving endian problems.
  */
-public class ByteOrder {
+public class ByteOrderMatei {
     /**
      * Returns the reverse of x.
      */
@@ -114,20 +114,6 @@ public class ByteOrder {
         buf[offset+1]=(byte)((x>>8) & 0x000000FF);
         buf[offset+2]=(byte)((x>>16) & 0x000000FF);
         buf[offset+3]=(byte)((x>>24) & 0x000000FF);
-    }
-
-    /**
-     * long to little-endian bytes: writes x to buf[offset..]
-     */
-    public static void long2leb(long x, byte[] buf, int offset) {
-        buf[offset]=(byte)(x & 0x000000FF);
-        buf[offset+1]=(byte)((x>>8) & 0x000000FF);
-        buf[offset+2]=(byte)((x>>16) & 0x000000FF);
-        buf[offset+3]=(byte)((x>>24) & 0x000000FF);
-        buf[offset+4]=(byte)((x>>32) & 0x000000FF);
-        buf[offset+5]=(byte)((x>>40) & 0x000000FF);
-        buf[offset+6]=(byte)((x>>48) & 0x000000FF);
-        buf[offset+7]=(byte)((x>>56) & 0x000000FF);
     }
 
     /**
