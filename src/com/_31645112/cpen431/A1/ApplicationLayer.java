@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 public class ApplicationLayer {
+    private static Logger log = Logger.getLogger(ApplicationLayer.class.getName());
+
     final static String LOCAL_IP = "12.34.56.78";
     final static int MAX_PAYLOAD_SIZE = 256;
     InetAddress remoteIP;
@@ -41,7 +44,10 @@ public class ApplicationLayer {
         clearBuffers();
         setMessage(studentNumber);
         attemptSendMessage();
+
         String response = encoder.decodeResponse(inBuf);
+        log.info("Secret: " + response);
+
         clearBuffers();
         return response;
     }
@@ -53,6 +59,8 @@ public class ApplicationLayer {
 
     private void setMessage(int studentNumber) {
         outBuf.put(encoder.getHeader((int) System.currentTimeMillis(), true));
+
+        log.info("Sending ID: " + studentNumber);
         outBuf.put(encoder.getPayload(studentNumber));
     }
 
@@ -76,12 +84,14 @@ public class ApplicationLayer {
                 inBuf.put(packet.getData());
                 break;
             } catch (InterruptedIOException e) {
-                System.err.println("Wait on remote host timed out.");
+                log.info("Wait on remote host timed out.");
                 timeout *= 2;
                 attempts--;
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        if (attempts == 0)
+            log.info("Retry attempts failed.");
     }
 }

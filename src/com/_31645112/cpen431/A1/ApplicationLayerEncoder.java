@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import static java.lang.Math.pow;
 
@@ -26,6 +27,8 @@ import static java.lang.Math.pow;
             Code (byte[]): X
  */
 public class ApplicationLayerEncoder {
+    private static Logger log = Logger.getLogger(ApplicationLayerEncoder.class.getName());
+
     final static int UNIQUE_ID_LENGTH = 16;
     final static int CLIENT_PAYLOAD_SIZE = 4;
     final static int SECRET_CODE_COUNT_LENGTH = 4;
@@ -36,12 +39,6 @@ public class ApplicationLayerEncoder {
     public ApplicationLayerEncoder(InetAddress clientIP, int port) {
         this.clientIP = clientIP;
         this.port = port;
-    }
-
-    // http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
-    private static int randInt(int min, int max) {
-        Random rand = new Random();
-        return rand.nextInt((max - min) + 1) + min;
     }
 
     public byte[] getHeader(int timestamp, boolean randPad) {
@@ -69,10 +66,17 @@ public class ApplicationLayerEncoder {
 
     public String decodeResponse(ByteBuffer inBuf) {
         int secretCodeLength = inBuf.order(ByteOrder.LITTLE_ENDIAN).getInt(UNIQUE_ID_LENGTH);
+        log.info("Secret code length: " + secretCodeLength);
 
         byte[] secretCode = new byte[secretCodeLength];
         System.arraycopy(inBuf.array(), SECRET_CODE_OFFSET, secretCode, 0, secretCodeLength);
 
         return StringUtils.byteArrayToHexString(secretCode);
+    }
+
+    // http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java
+    private static int randInt(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt((max - min) + 1) + min;
     }
 }
