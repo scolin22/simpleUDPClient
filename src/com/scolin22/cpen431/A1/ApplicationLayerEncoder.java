@@ -1,10 +1,11 @@
-package com._31645112.cpen431.A1;
+package com.scolin22.cpen431.A1;
 
-import com._31645112.cpen431.utils.StringUtils;
+import com.scolin22.cpen431.utils.StringUtils;
 
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -41,7 +42,7 @@ public class ApplicationLayerEncoder {
         this.port = port;
     }
 
-    public byte[] getHeader(int timestamp, boolean randPad) {
+    public byte[] packHeader(int timestamp, boolean randPad) {
         ByteBuffer uniqueID = ByteBuffer.allocate(UNIQUE_ID_LENGTH).order(ByteOrder.LITTLE_ENDIAN);
 
         uniqueID.put(clientIP.getAddress());
@@ -56,7 +57,7 @@ public class ApplicationLayerEncoder {
         return uniqueID.array();
     }
 
-    public byte[] getPayload(int studentNumber) {
+    public byte[] packPayload(int studentNumber) {
         ByteBuffer appPayload = ByteBuffer.allocate(CLIENT_PAYLOAD_SIZE);
 
         appPayload.putInt(studentNumber);
@@ -64,14 +65,14 @@ public class ApplicationLayerEncoder {
         return appPayload.array();
     }
 
-    public String decodeResponse(ByteBuffer inBuf) {
+    public byte[] unpackPayload(ByteBuffer inBuf) {
         int secretCodeLength = inBuf.order(ByteOrder.LITTLE_ENDIAN).getInt(UNIQUE_ID_LENGTH);
         log.info("Secret code length: " + secretCodeLength);
+        return Arrays.copyOfRange(inBuf.array(), SECRET_CODE_OFFSET, SECRET_CODE_OFFSET + secretCodeLength);
+    }
 
-        byte[] secretCode = new byte[secretCodeLength];
-        System.arraycopy(inBuf.array(), SECRET_CODE_OFFSET, secretCode, 0, secretCodeLength);
-
-        return StringUtils.byteArrayToHexString(secretCode);
+    public byte[] unpackHeader(ByteBuffer bb) {
+        return Arrays.copyOfRange(bb.array(), 0, UNIQUE_ID_LENGTH);
     }
 
     // http://stackoverflow.com/questions/363681/generating-random-integers-in-a-range-with-java

@@ -1,4 +1,4 @@
-package com._31645112.cpen431.A1;
+package com.scolin22.cpen431.A1;
 
 public class SecretCodeClient {
     ApplicationLayer al;
