@@ -47,9 +47,9 @@ public class ApplicationLayer {
         clearBuffers();
         setMessage(studentNumber);
 
-        getMessage();
-
-        String response = StringUtils.byteArrayToHexString(encoder.unpackPayload(inBuf));
+        String response = "Unknown";
+        if (getMessage())
+            response = StringUtils.byteArrayToHexString(encoder.unpackPayload(inBuf));
         log.info("Secret: " + response);
 
         clearBuffers();
@@ -57,8 +57,8 @@ public class ApplicationLayer {
     }
 
     private boolean getMessage() {
-        int attempts = 10;
-        while (attempts > 0) {
+        int attempts = 5;
+        while (attempts-- > 0) {
             attemptSendMessage();
             byte[] b1 = encoder.unpackHeader(inBuf);
             byte[] b2 = encoder.unpackHeader(outBuf);
