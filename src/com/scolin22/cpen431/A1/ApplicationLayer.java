@@ -9,24 +9,29 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import static java.lang.Math.pow;
+
 public class ApplicationLayer {
     private static Logger log = Logger.getLogger(ApplicationLayer.class.getName());
 
     final static String LOCAL_IP = "12.34.56.78";
     final static int MAX_PAYLOAD_SIZE = 256;
+    final static int MAX_ATTEMPTS = 3;
     InetAddress remoteIP;
     DatagramSocket socket;
     int remotePort;
+    int timeout;
     ApplicationLayerEncoder encoder;
     ByteBuffer outBuf;
     ByteBuffer inBuf;
 
-    public ApplicationLayer(String remoteIP, int remotePort) {
+    public ApplicationLayer(String remoteIP, int remotePort, int timeout) {
         try {
             this.remoteIP = InetAddress.getByName(remoteIP);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
+        this.timeout = timeout;
         this.remotePort = remotePort;
         outBuf = ByteBuffer.allocate(MAX_PAYLOAD_SIZE);
         inBuf = ByteBuffer.allocate(MAX_PAYLOAD_SIZE);
@@ -82,11 +87,10 @@ public class ApplicationLayer {
     }
 
     private void attemptSendMessage() {
-        int attempts = 3;
-        int timeout = 100;
+        int attempts = MAX_ATTEMPTS;
         while (attempts > 0) {
             try {
-                socket.setSoTimeout(timeout);
+                socket.setSoTimeout(timeout * (int) pow(2, MAX_ATTEMPTS - attempts));
             } catch (SocketException e) {
                 e.printStackTrace();
             }
@@ -99,7 +103,6 @@ public class ApplicationLayer {
                 break;
             } catch (InterruptedIOException e) {
                 log.info("Wait on remote host timed out.");
-                timeout *= 2;
                 attempts--;
             } catch (IOException e) {
                 e.printStackTrace();
