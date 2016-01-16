@@ -1,29 +1,20 @@
 package com.scolin22.cpen431.A1;
 
-import com.scolin22.cpen431.utils.StringUtils;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.logging.Logger;
 
-import static java.lang.Math.pow;
-
 public class ApplicationLayer {
-    private static Logger log = Logger.getLogger(ApplicationLayer.class.getName());
-
     final static String LOCAL_IP = "12.34.56.78";
     final static int MAX_PAYLOAD_SIZE = 256;
-    final static int MAX_ATTEMPTS = 3;
+    private static Logger log = Logger.getLogger(ApplicationLayer.class.getName());
     InetAddress remoteIP;
     DatagramSocket socket;
     int remotePort;
     int timeout;
     ApplicationLayerEncoder encoder;
-    ByteBuffer outBuf;
-    ByteBuffer inBuf;
 
     public ApplicationLayer(String remoteIP, int remotePort, int timeout) {
         try {
@@ -33,11 +24,8 @@ public class ApplicationLayer {
         }
         this.timeout = timeout;
         this.remotePort = remotePort;
-        outBuf = ByteBuffer.allocate(MAX_PAYLOAD_SIZE);
-        inBuf = ByteBuffer.allocate(MAX_PAYLOAD_SIZE);
-        //TODO: Consider using java.nio.DatagramChannel, non-block IO
         try {
-            socket = new DatagramSocket(4567);
+            socket = new DatagramSocket();
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -48,67 +36,37 @@ public class ApplicationLayer {
         }
     }
 
-    public String getSecretMessage(int studentNumber) {
-        clearBuffers();
-        setMessage(studentNumber);
-
-        String response = "Unknown";
-        if (getMessage())
-            response = StringUtils.byteArrayToHexString(encoder.unpackPayload(inBuf));
-        log.info("Secret: " + response);
-
-        clearBuffers();
-        return response;
-    }
-
-    private boolean getMessage() {
-        int attempts = 5;
-        while (attempts-- > 0) {
-            attemptSendMessage();
-            byte[] b1 = encoder.unpackHeader(inBuf);
-            byte[] b2 = encoder.unpackHeader(outBuf);
-            if (Arrays.equals(b1, b2)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void clearBuffers() {
-        inBuf.clear();
-        outBuf.clear();
-    }
-
-    private void setMessage(int studentNumber) {
+    public void setCodeMessage(ByteBuffer outBuf, int studentNumber) {
         outBuf.put(encoder.packHeader((int) System.currentTimeMillis(), true));
-
         log.info("Sending ID: " + studentNumber);
         outBuf.put(encoder.packPayload(studentNumber));
     }
 
-    private void attemptSendMessage() {
-        int attempts = MAX_ATTEMPTS;
-        while (attempts > 0) {
-            try {
-                socket.setSoTimeout(timeout * (int) pow(2, MAX_ATTEMPTS - attempts));
-            } catch (SocketException e) {
-                e.printStackTrace();
-            }
-
-            DatagramPacket outPacket = new DatagramPacket(outBuf.array(), MAX_PAYLOAD_SIZE, remoteIP, remotePort);
-            DatagramPacket inPacket  = new DatagramPacket(inBuf.array(), MAX_PAYLOAD_SIZE);
-            try {
-                socket.send(outPacket);
-                socket.receive(inPacket);
-                break;
-            } catch (InterruptedIOException e) {
-                log.info("Wait on remote host timed out.");
-                attempts--;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+    public void sendCodeMessage(ByteBuffer outBuf) {
+        DatagramPacket outPacket = new DatagramPacket(outBuf.array(), MAX_PAYLOAD_SIZE, remoteIP, remotePort);
+        try {
+            socket.send(outPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        if (attempts == 0)
-            log.info("Retry attempts failed.");
+    }
+
+    public boolean getMessage(ByteBuffer inBuf) {
+        try {
+            socket.setSoTimeout(1000);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
+        DatagramPacket inPacket  = new DatagramPacket(inBuf.array(), MAX_PAYLOAD_SIZE);
+        try {
+            socket.receive(inPacket);
+        } catch (InterruptedIOException e) {
+//            log.info("Wait on remote host timed out.");
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 }

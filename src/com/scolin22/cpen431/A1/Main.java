@@ -10,6 +10,6 @@ public class Main {
 
         SecretCodeClient client = new SecretCodeClient(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
 
-        System.out.println(client.getSecretCode(Integer.parseInt(args[3])));
+        client.getSecretCode(Integer.parseInt(args[3]));
     }
 }
