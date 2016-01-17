@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.DatagramChannel;
 import java.util.logging.Logger;
 
 public class ApplicationLayer {
@@ -11,7 +12,7 @@ public class ApplicationLayer {
     final static int MAX_PAYLOAD_SIZE = 256;
     private static Logger log = Logger.getLogger(ApplicationLayer.class.getName());
     InetAddress remoteIP;
-    DatagramSocket socket;
+    DatagramChannel channel;
     int remotePort;
     int timeout;
     ApplicationLayerEncoder encoder;
@@ -25,12 +26,13 @@ public class ApplicationLayer {
         this.timeout = timeout;
         this.remotePort = remotePort;
         try {
-            socket = new DatagramSocket();
-        } catch (SocketException e) {
+            channel = DatagramChannel.open();
+            channel.socket().bind(new InetSocketAddress(0));
+        } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            encoder = new ApplicationLayerEncoder(InetAddress.getByName(LOCAL_IP), socket.getLocalPort());
+            encoder = new ApplicationLayerEncoder(InetAddress.getByName(LOCAL_IP), channel.socket().getLocalPort());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
@@ -43,9 +45,10 @@ public class ApplicationLayer {
     }
 
     public void sendCodeMessage(ByteBuffer outBuf) {
-        DatagramPacket outPacket = new DatagramPacket(outBuf.array(), MAX_PAYLOAD_SIZE, remoteIP, remotePort);
         try {
-            socket.send(outPacket);
+            outBuf.flip();
+            InetSocketAddress i = new InetSocketAddress(remoteIP, remotePort);
+            channel.send(outBuf, i);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,13 +56,8 @@ public class ApplicationLayer {
 
     public boolean getMessage(ByteBuffer inBuf) {
         try {
-            socket.setSoTimeout(1000);
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        DatagramPacket inPacket  = new DatagramPacket(inBuf.array(), MAX_PAYLOAD_SIZE);
-        try {
-            socket.receive(inPacket);
+            inBuf.clear();
+            channel.receive(inBuf);
         } catch (InterruptedIOException e) {
 //            log.info("Wait on remote host timed out.");
             return false;
